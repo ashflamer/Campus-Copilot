@@ -141,7 +141,8 @@ body.embed header{display:none}
   if (!window.L) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>');
 </script>
 <script>
-const API = location.origin;
+// works at the site root (:8765/) and behind a path prefix (e.g. the workspace proxy /svc/nav/)
+const API = location.origin + location.pathname.replace(/\/[^/]*$/, "");
 const params = new URLSearchParams(location.search);
 if (params.get("embed") === "1") document.body.classList.add("embed");
 
