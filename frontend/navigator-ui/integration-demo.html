@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CampusScope + Navigator</title>
+<style>
+  body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f1ea;color:#1b1d1f}
+  main{max-width:760px;margin:0 auto;padding:28px 16px 100px}
+  h1{font-size:22px;margin:0 0 4px} .sub{color:#6b6f75;margin-bottom:20px}
+  section{background:#fffdf8;border:1px solid #e3ded2;border-radius:16px;padding:16px;margin-bottom:16px}
+  h2{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px;color:#6b6f75}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;gap:8px;flex-wrap:wrap}
+  .row:last-child{border:0}
+  .due{color:#b3261e;font-weight:600;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <h1>📚 CampusScope</h1>
+  <div class="sub">Demo of how the Navigator plugs into the existing app (one script tag).</div>
+
+  <section>
+    <h2>Next class</h2>
+    <div id="next"></div>
+  </section>
+
+  <section>
+    <h2>Assignments</h2>
+    <div class="row"><span>MIS-1 · Regression report</span><span class="due">Due today 5 PM</span></div>
+    <div class="row"><span>CT · LiDAR velocity notebook</span><span class="due">Due Fri</span></div>
+  </section>
+
+  <section>
+    <h2>Today's timetable</h2>
+    <div class="row"><span>09:00 · Computational Thinking</span><span data-room="D-102">D-102</span></div>
+    <div class="row"><span>11:00 · AI Lab</span><span data-room="A-402">A-402</span></div>
+    <div class="row"><span>14:00 · Computational Mechanics</span><span data-room="C-305">C-305</span></div>
+  </section>
+</main>
+
+<!-- ↓↓↓ THE ONLY LINE CampusScope needs ↓↓↓ -->
+<script src="widget.js"></script>
+<script>
+  // Feed CampusScope's own timetable (day: Mon=0 … Sun=6). Start point = Main Gate for the demo.
+  const today = (new Date().getDay() + 6) % 7;
+  const entries = [
+    {day: today, start: "09:00", end: "09:50", course: "Computational Thinking", room: "D-102"},
+    {day: today, start: "11:00", end: "11:50", course: "AI Lab", room: "A-402"},
+    {day: today, start: "14:00", end: "14:50", course: "Computational Mechanics", room: "C-305"},
+    {day: today, start: "16:00", end: "16:50", course: "Smart Grid Security", room: "N-101"},
+  ];
+  CampusNav.nextClassCard("#next", entries, "main_gate");
+</script>
+</body>
+</html>
