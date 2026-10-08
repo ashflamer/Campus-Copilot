@@ -1,0 +1,75 @@
+/* Study Quest - gamification layer for the CampusScope workspace */
+.top{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 8%,var(--panel)) 0%,var(--panel) 60%)}
+.top:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--accent),#f2a541,#4cc38a)}
+.top{position:sticky}
+
+/* player card in the header */
+.player{display:flex;align-items:center;gap:10px;padding:5px 12px 5px 6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);cursor:pointer;transition:border-color .2s,transform .2s}
+.player:hover{border-color:var(--accent);transform:translateY(-1px)}
+.player .lvl{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font:700 15px system-ui;color:#fff;background:linear-gradient(135deg,var(--accent),#f2a541);box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 35%,transparent)}
+.player .info{min-width:130px}
+.player .t{font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center}
+.player .streak{font-size:12px;color:#e8590c;font-weight:700}
+.player .bar{height:6px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:4px}
+.player .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#f2a541);border-radius:99px;transition:width .6s cubic-bezier(.2,.9,.3,1.2)}
+.player .xp{font-size:11px;color:var(--muted)}
+
+/* quest cards */
+.col h3 .qname{font-weight:700}
+.task{position:relative}
+.task .reward{position:absolute;top:10px;right:10px;font:700 11px system-ui;color:#b7791f;background:color-mix(in srgb,#f2a541 18%,transparent);border-radius:99px;padding:2px 8px}
+.task .t{padding-right:64px}
+.task.boss{box-shadow:0 0 0 2px color-mix(in srgb,var(--bad) 55%,transparent),var(--shadow)}
+.task .bosstag{display:inline-block;font:700 11px system-ui;color:#fff;background:var(--bad);border-radius:99px;padding:2px 8px;margin-bottom:6px;animation:pulse 1.6s ease-in-out infinite}
+.task.won{border-left-color:#4cc38a!important}
+.task.won .bar i{background:linear-gradient(90deg,#4cc38a,#9be15d)}
+.task .hp{font-size:11px;color:var(--muted)}
+
+/* daily quests + attendance */
+.quests .q{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.quests .q:last-child{border:0}
+.quests .q .ic{font-size:22px;width:30px;text-align:center}
+.quests .q .tx{flex:1}
+.quests .q small{color:var(--muted)}
+.quests .q .ok{font-weight:700;color:var(--ok)}
+.quests .q.done .tx{opacity:.6;text-decoration:line-through}
+.qhead{display:flex;justify-content:space-between;align-items:center}
+.ring{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 12px system-ui;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--chip) 0)}
+.ring span{width:34px;height:34px;border-radius:50%;background:var(--panel);display:grid;place-items:center}
+.att .cls{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.att .cls:last-child{border:0}
+.att .cls .when{font-weight:700;color:var(--accent);min-width:96px;font-variant-numeric:tabular-nums}
+.att .cls .nm{flex:1}
+.att .cls button.here{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:600}
+.att .cls .done{color:var(--ok);font-weight:700}
+.att .rate{font-size:13px;color:var(--muted);margin-top:6px}
+.tt tr.today td{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+
+/* toast, xp float, confetti, modal */
+.gtoast{position:fixed;left:50%;top:18px;transform:translate(-50%,-140%);z-index:100001;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-left:5px solid #f2a541;border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;transition:transform .45s cubic-bezier(.2,.9,.3,1.3);max-width:92vw}
+.gtoast.show{transform:translate(-50%,0)}
+.gtoast .ic{font-size:30px;animation:gpop .6s ease}
+.gtoast b{display:block}
+.gtoast span{font-size:13px;color:var(--muted)}
+.gxp{position:fixed;z-index:100001;pointer-events:none;font:800 17px system-ui;color:#f2a541;text-shadow:0 1px 2px rgba(0,0,0,.25);animation:gfloat 1.2s ease forwards}
+.gconf{position:fixed;z-index:100000;pointer-events:none;font-size:18px;animation:gfall 1.5s ease-in forwards}
+.gmodal{position:fixed;inset:0;z-index:100002;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
+.gmodal.on{display:flex}
+.gmodal .box{width:min(560px,100%);max-height:86vh;overflow:auto;background:var(--panel);color:var(--ink);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+.gmodal h2{margin:0 0 4px}
+.gmodal .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.gmodal .bd{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:10px;align-items:center;background:var(--bg)}
+.gmodal .bd .e{font-size:28px}
+.gmodal .bd.off{opacity:.45}.gmodal .bd.off .e{filter:grayscale(1)}
+.gmodal .bd b{display:block;font-size:14px}.gmodal .bd small{color:var(--muted);font-size:12px}
+.gmodal .x{float:right;border-radius:99px;width:32px;height:32px;padding:0}
+.gmodal .stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--muted)}
+.gmodal .stats b{color:var(--ink)}
+.gmodal .reset{margin-top:14px;border:0;background:transparent;color:var(--muted);font-size:12px;text-decoration:underline}
+
+@keyframes gpop{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes gfloat{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(-60px)}}
+@keyframes gfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),260px) rotate(var(--rot))}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+@media (prefers-reduced-motion:reduce){.gconf,.gxp{display:none}*{animation:none!important}}
+@media (max-width:860px){.player .info{min-width:0}.player .xp{display:none}}
