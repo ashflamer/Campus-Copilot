@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Campus Navigator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="game.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -138,6 +140,8 @@ const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const origin = () => $("#origin").value || null;
 const accessible = () => $("#acc").checked;
+window.DATA_PUBLIC = () => (DATA ? DATA.locations : []);   // read-only hooks for game.js
+window.MARKERS_PUBLIC = () => markers;
 const store = {get(k){try{return localStorage.getItem(k)}catch{return null}}, set(k,v){try{localStorage.setItem(k,v)}catch{}}};
 
 async function api(path, opts) {
@@ -434,5 +438,6 @@ async function load() {
     <div class="meta">Tips: <kbd>/</kbd> search · <kbd>Esc</kbd> clear route · <kbd>Alt</kbd>+<kbd>E</kbd> pin editor · 🔗 share any route</div>`);
 })();
 </script>
+<script src="game.js"></script>
 </body>
 </html>
