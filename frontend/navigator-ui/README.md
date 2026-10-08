@@ -6,6 +6,7 @@ Served by `backend/navigator-api` at http://localhost:8765 (override with `NAV_S
 | File | What |
 |---|---|
 | `index.html` | map, search box, voice input, category chips, route cards, HELP, pin editor |
+| `game.js`, `game.css` | Campus Explorer gamification layer (XP, levels, badges) |
 | `widget.js` | `CampusNav.open()`, `CampusNav.nextClassCard()`, `CampusNav.linkRooms()`, floating 🗺️ button |
 | `integration-demo.html` | example of embedding in another page |
 | `vendor/leaflet/` | Leaflet 1.9 (BSD-2-Clause), bundled so it works without a CDN |
@@ -19,6 +20,9 @@ Deep links: `/?room=A-402&from=central_library`, `/?q=nearest%20canteen`, `/?nex
 - **⇄ Reverse**: one tap shows the way back.
 - **Recent searches**: last 5 questions are kept in the browser (emergency queries are never stored).
 - **Shortcuts**: `/` focuses search, `Esc` clears the route, `Alt+E` opens the pin editor.
+- **★ Favourite places**: "☆ Save place" on any place card; saved places appear as one-tap chips that route you there from your start point.
+- **🌓 Light / dark mode**: toggle in the header, remembered per browser (defaults to your system setting).
+- **🗺️ Map legend**: collapsible key for every pin icon, your route, step-free routes, walkways and paths with stairs.
 
 ## 🏅 Campus Explorer (gamification)
 
