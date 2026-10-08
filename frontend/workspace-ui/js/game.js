@@ -163,7 +163,7 @@ function onUpdate(prev, a) {
 wrap("quickAdd", () => { S.added += 1; gain(10, "New quest"); });
 wrap("breakdown", () => { S.breakdowns += 1; gain(10, "Quest split into steps"); });
 wrap("plan", () => { S.plans += 1; gain(15, "Day planned"); dailyDone("plan"); });
-wrap("saveTimetable", () => { S.ttsaves += 1; gain(10, "Timetable saved"); });
+wrap("saveTimetable", (saved, entries) => { S.ttsaves += 1; if (Array.isArray(entries)) state.timetable = entries; gain(10, "Timetable saved"); renderAttendance(); });
 
 // opening the navigator (widget loads later, so wrap when it appears)
 const navWait = setInterval(() => {
@@ -226,7 +226,12 @@ function attendanceRate() {
   const keys = Object.keys(S.att);
   return keys.length ? Math.round(100 * keys.filter(k => S.att[k]).length / keys.length) : null;
 }
+let ttFetch = null;
 function renderAttendance() {
+  // the timetable may not be in shared state yet (it loads in parallel) - fetch it once
+  if (!(state.timetable || []).length && !ttFetch) {
+    ttFetch = api.timetable().then(t => { state.timetable = Array.isArray(t) ? t : t.entries || []; renderAttendance(); }).catch(() => {});
+  }
   const list = (state.timetable || []).filter(e => +e.day === weekday()).sort((a, b) => a.start.localeCompare(b.start));
   const html = `<h3>📍 Today's classes · check in</h3>
     ${list.length ? list.map(e => `<div class="cls"><span class="when">${esc(e.start)}–${esc(e.end)}</span><span class="nm"><b>${esc(e.course)}</b> <span class="muted small">${esc(e.room)}</span></span>

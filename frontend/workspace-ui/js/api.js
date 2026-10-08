@@ -46,4 +46,7 @@ export const api = {
 export const nav = {
   campus: () => call("nav", "/api/campus"),
   health: () => call("nav", "/api/health"),
+  // Next class from the student's own timetable entries (navigator POST integration).
+  nextClass: (entries, from) => call("nav", "/api/next-class", "POST", { entries, from }),
+  route: (from, to) => call("nav", `/api/route?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
 };
