@@ -78,6 +78,9 @@ label.toggle{display:flex;gap:6px;align-items:center;white-space:nowrap;cursor:p
 .recent button{border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:3px 10px;font:500 12px Inter;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .recent button:hover{border-color:var(--accent)}
 .eta{color:var(--accent)}
+.favs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 18px 0;font-size:12px;color:var(--muted);align-items:center}
+.favs button{border:1px solid color-mix(in srgb,#f2a541 60%,var(--line));background:color-mix(in srgb,#f2a541 12%,transparent);color:var(--ink);border-radius:99px;padding:3px 10px;font:500 12px Inter;cursor:pointer}
+.btn.fav-on{background:color-mix(in srgb,#f2a541 25%,var(--chip))}
 kbd{font:600 11px Inter;background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:0 5px}
 @media (max-width:760px){
   body{flex-direction:column-reverse}
@@ -108,6 +111,7 @@ body.embed header{display:none}
     <button class="gps" id="gps" title="Use my location">📍</button>
   </div>
   <div class="row"><label class="toggle"><input type="checkbox" id="acc"> ♿ Step-free route</label></div>
+  <div class="favs" id="favs"></div>
   <div class="recent" id="recent"></div>
   <div class="chips" id="chips"></div>
   <div class="ai" id="ai"></div>
@@ -241,6 +245,21 @@ async function shareRoute(from, to) {
   } catch { card(`<div class="reply">🔗 Copy this link: <span class="meta">${esc(url)}</span></div>`); }
 }
 
+/* favourite places: one tap to route there from your start point */
+const FAV_KEY = "nav-favs";
+function favList() { try { return JSON.parse(store.get(FAV_KEY) || "[]").filter(id => loc(id)); } catch { return []; } }
+function isFav(id) { return favList().includes(id); }
+function toggleFav(id) {
+  const list = favList(); const i = list.indexOf(id);
+  i >= 0 ? list.splice(i, 1) : list.push(id);
+  store.set(FAV_KEY, JSON.stringify(list.slice(0, 8))); renderFavs();
+}
+function renderFavs() {
+  const list = favList(), el = $("#favs");
+  el.innerHTML = list.length ? `<span>★ Saved:</span>` + list.map(id => `<button data-id="${id}">${ICON[loc(id).category] || "📍"} ${esc(loc(id).name)}</button>`).join("") : "";
+  el.querySelectorAll("button").forEach(b => b.onclick = () => (origin() && origin() !== b.dataset.id) ? navigate(origin(), b.dataset.id) : showPlace(b.dataset.id));
+}
+
 const RECENT_KEY = "nav-recent";
 function recentList() { try { return JSON.parse(store.get(RECENT_KEY) || "[]"); } catch { return []; } }
 function addRecent(text) {
@@ -276,10 +295,13 @@ async function showPlace(id, fromAsk) {
     <div class="meta" style="margin-top:8px">What's here</div><div>${l.inside.map(esc).join(" · ")}</div>
     ${r ? `<div class="meta" style="margin-top:8px">From ${esc(loc(o)?.name)}: <b>${r.distance_m} m · ${r.minutes} min</b>${r.uses_stairs ? " · has stairs" : " · step-free"}</div>` : (o === id ? '<div class="meta">You are here.</div>' : "")}
     <div class="btns">${o && o !== id ? `<button class="btn primary" data-nav>Navigate →</button><button class="btn" data-opts>Route options</button>` : ""}
-      <button class="btn" data-start>Set as start</button></div>`);
+      <button class="btn" data-start>Set as start</button><button class="btn ${isFav(id) ? "fav-on" : ""}" data-fav>${isFav(id) ? "★ Saved" : "☆ Save place"}</button></div>`);
   d.querySelector("[data-nav]")?.addEventListener("click", () => navigate(o, id));
   d.querySelector("[data-opts]")?.addEventListener("click", () => routeOptions(o, id));
   d.querySelector("[data-start]").addEventListener("click", () => setOrigin(id));
+  d.querySelector("[data-fav]").addEventListener("click", e => {
+    toggleFav(id); e.target.textContent = isFav(id) ? "★ Saved" : "☆ Save place"; e.target.classList.toggle("fav-on", isFav(id));
+  });
 }
 
 async function navigate(from, to) {
@@ -428,7 +450,7 @@ async function load() {
     if (e.key === "/" && document.activeElement !== $("#q")) { e.preventDefault(); $("#q").focus(); }
     if (e.key === "Escape") { clearRoute(); $("#q").blur(); }
   });
-  renderRecent();
+  renderRecent(); renderFavs();
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SR) {
