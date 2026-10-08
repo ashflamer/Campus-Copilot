@@ -1,0 +1,14 @@
+{
+  "_note": "Room code -> building. 'rooms' wins over 'prefix_rules'. PREFIX RULES BELOW ARE PLACEHOLDERS — replace with the real campus room-numbering scheme. Floor is guessed from the first digit of the number (e.g. 402 -> floor 4) unless given.",
+  "rooms": {
+    "A-402": {"location": "ab3", "floor": 4, "label": "AI Lab"},
+    "D-102": {"location": "ab2", "floor": 1, "label": "Classroom"}
+  },
+  "prefix_rules": [
+    {"prefix": "A", "location": "ab3"},
+    {"prefix": "B", "location": "ab1"},
+    {"prefix": "C", "location": "ab1"},
+    {"prefix": "D", "location": "ab2"},
+    {"prefix": "N", "location": "ab3"}
+  ]
+}
