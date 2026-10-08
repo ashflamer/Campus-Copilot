@@ -44,8 +44,8 @@ label.toggle{display:flex;gap:6px;align-items:center;white-space:nowrap;cursor:p
 .card h3{margin:0 0 4px;font:700 17px "Space Grotesk",system-ui,sans-serif}
 .reply{font-size:15px}
 .meta{color:var(--muted);font-size:12px;margin-top:6px}
-.big{display:flex;gap:18px;margin:10px 0}
-.big div{font:700 22px "Space Grotesk",system-ui,sans-serif} .big span{display:block;font:500 11px Inter;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.big{display:flex;flex-wrap:wrap;gap:8px 16px;margin:10px 0}
+.big div{font:700 20px "Space Grotesk",system-ui,sans-serif;white-space:nowrap} .big span{display:block;font:500 11px Inter;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .steps{margin:8px 0 0;padding-left:0;list-style:none}
 .steps li{padding:6px 0 6px 22px;border-left:2px solid var(--line);margin-left:6px;position:relative;font-size:14px}
 .steps li:before{content:"";position:absolute;left:-6px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--route)}
@@ -72,6 +72,11 @@ label.toggle{display:flex;gap:6px;align-items:center;white-space:nowrap;cursor:p
 #editbar{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:1000;background:#1b1d1f;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;gap:10px;align-items:center}
 #editbar button{border:0;border-radius:8px;padding:6px 10px;font:600 12px Inter;cursor:pointer}
 .ai{font-size:11px;color:var(--muted);margin:6px 18px 0}
+.recent{display:flex;flex-wrap:wrap;gap:6px;margin:8px 18px 0;font-size:12px;color:var(--muted);align-items:center}
+.recent button{border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:3px 10px;font:500 12px Inter;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent button:hover{border-color:var(--accent)}
+.eta{color:var(--accent)}
+kbd{font:600 11px Inter;background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:0 5px}
 @media (max-width:760px){
   body{flex-direction:column-reverse}
   #panel{width:100%;height:56%;border-right:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:var(--shadow)}
@@ -99,6 +104,7 @@ body.embed header{display:none}
     <button class="gps" id="gps" title="Use my location">📍</button>
   </div>
   <div class="row"><label class="toggle"><input type="checkbox" id="acc"> ♿ Step-free route</label></div>
+  <div class="recent" id="recent"></div>
   <div class="chips" id="chips"></div>
   <div class="ai" id="ai"></div>
   <div id="out"></div>
@@ -206,12 +212,50 @@ function drawRoute(r, color) {
 
 const loc = id => DATA.locations.find(l => l.id === id);
 
+/* ------------------------------------------------- extras: ETA, share, recent */
+function arrivalTime(minutes) {
+  const t = new Date(Date.now() + minutes * 60000);
+  return t.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+}
+
+function routeLink(from, to) {
+  const base = location.href.split("?")[0];
+  const p = new URLSearchParams({from, to});
+  if (accessible()) p.set("accessible", "1");
+  return `${base}?${p}`;
+}
+
+async function shareRoute(from, to) {
+  const url = routeLink(from, to);
+  const title = `Route to ${loc(to)?.name || to}`;
+  try {
+    if (navigator.share && matchMedia("(max-width:760px)").matches) { await navigator.share({title, url}); return; }
+    await navigator.clipboard.writeText(url);
+    card(`<div class="reply">🔗 Link copied — send it to a friend: <span class="meta">${esc(url)}</span></div>`);
+  } catch { card(`<div class="reply">🔗 Copy this link: <span class="meta">${esc(url)}</span></div>`); }
+}
+
+const RECENT_KEY = "nav-recent";
+function recentList() { try { return JSON.parse(store.get(RECENT_KEY) || "[]"); } catch { return []; } }
+function addRecent(text) {
+  const t = text.trim(); if (!t || /emergency/i.test(t)) return;
+  const list = [t, ...recentList().filter(x => x.toLowerCase() !== t.toLowerCase())].slice(0, 5);
+  store.set(RECENT_KEY, JSON.stringify(list)); renderRecent();
+}
+function renderRecent() {
+  const list = recentList(), el = $("#recent");
+  el.innerHTML = list.length ? `<span>Recent:</span>` + list.map(t => `<button title="${esc(t)}">${esc(t)}</button>`).join("") : "";
+  el.querySelectorAll("button").forEach(b => b.onclick = () => ask(b.title));
+}
+
 /* -------------------------------------------------------------- render */
 function routeBlock(r) {
   if (!r) return "";
   const steps = r.steps.map(s => `<li>${esc(s.via)} → <b>${esc(s.to)}</b> <span class="meta">${s.meters} m${s.stairs ? " · stairs" : ""}${s.covered ? " · covered" : ""}</span></li>`).join("");
-  return `<div class="big"><div>${r.distance_m} m<span>distance</span></div><div>${r.minutes} min<span>walk</span></div><div>${r.uses_stairs ? "🪜" : "♿"}<span>${r.uses_stairs ? "has stairs" : "step-free"}</span></div></div>
-          <ol class="steps"><li>Start: <b>${esc(loc(r.origin)?.name || r.origin)}</b></li>${steps}<li>Arrive: <b>${esc(loc(r.destination)?.name || r.destination)}</b></li></ol>`;
+  return `<div class="big"><div>${r.distance_m} m<span>distance</span></div><div>${r.minutes} min<span>walk</span></div><div class="eta">${arrivalTime(r.minutes)}<span>arrive by</span></div><div>${r.uses_stairs ? "🪜" : "♿"}<span>${r.uses_stairs ? "has stairs" : "step-free"}</span></div></div>
+          <ol class="steps"><li>Start: <b>${esc(loc(r.origin)?.name || r.origin)}</b></li>${steps}<li>Arrive: <b>${esc(loc(r.destination)?.name || r.destination)}</b></li></ol>
+          <div class="btns"><button class="btn" data-share data-from="${esc(r.origin)}" data-to="${esc(r.destination)}" title="Copy a link to this route">🔗 Share route</button>
+          <button class="btn" data-swap data-from="${esc(r.origin)}" data-to="${esc(r.destination)}" title="Show the way back">⇄ Reverse</button></div>`;
 }
 
 async function showPlace(id, fromAsk) {
@@ -284,6 +328,7 @@ function renderAnswer(res) {
 
 async function ask(text) {
   text = (text || "").trim(); if (!text) return;
+  addRecent(text);
   const q = accessible() && !/accessible|stairs|wheelchair/i.test(text) ? text + " (accessible route)" : text;
   const wait = card(`<div class="meta">Thinking… “${esc(text)}”</div>`);
   try {
@@ -356,6 +401,20 @@ async function load() {
   $("#askForm").addEventListener("submit", e => { e.preventDefault(); ask($("#q").value); $("#q").value = ""; });
   $("#help").addEventListener("click", () => ask("medical emergency"));
 
+  // Share / reverse buttons inside any route card
+  $("#out").addEventListener("click", e => {
+    const b = e.target.closest("[data-share],[data-swap]"); if (!b) return;
+    if (b.hasAttribute("data-share")) shareRoute(b.dataset.from, b.dataset.to);
+    else { setOrigin(b.dataset.to, true); navigate(b.dataset.to, b.dataset.from); }
+  });
+
+  // Keyboard: "/" focuses search, Esc clears the route
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && document.activeElement !== $("#q")) { e.preventDefault(); $("#q").focus(); }
+    if (e.key === "Escape") { clearRoute(); $("#q").blur(); }
+  });
+  renderRecent();
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SR) {
     const rec = new SR(); rec.lang = "en-IN"; rec.interimResults = false;
@@ -372,7 +431,7 @@ async function load() {
   else if (params.get("next") === "1") ask("where is my next class");
   else if (params.get("to")) { const id = params.get("to"); origin() ? navigate(origin(), id) : showPlace(id); }
   else card(`<h3>Hi 👋</h3><div class="reply">Ask anything like <i>“take me from the library to CSE”</i>, <i>“nearest canteen”</i>, <i>“where is A-402”</i> or tap a category. Tap any pin to see what's inside.</div>
-    <div class="meta">Tip: pick your start point above · Alt+E opens the pin editor</div>`);
+    <div class="meta">Tips: <kbd>/</kbd> search · <kbd>Esc</kbd> clear route · <kbd>Alt</kbd>+<kbd>E</kbd> pin editor · 🔗 share any route</div>`);
 })();
 </script>
 </body>
