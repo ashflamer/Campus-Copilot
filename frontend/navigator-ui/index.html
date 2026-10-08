@@ -87,12 +87,14 @@ kbd{font:600 11px Inter;background:var(--chip);border:1px solid var(--line);bord
   #help{bottom:auto;top:12px;right:12px;padding:10px 14px}
 }
 body.embed header{display:none}
+:root[data-theme="dark"]{--bg:#111214;--panel:#1a1c1f;--ink:#ecebe7;--muted:#9a9ea5;--line:#2c2f34;--accent:#e0476f;--chip:#24272b;--open:#4cc38a;--closed:#f2766b;--unknown:#e0b04c;--shadow:0 8px 30px rgba(0,0,0,.45)}
+.theme-btn{margin-left:auto;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;width:34px;height:30px;cursor:pointer;font-size:15px}
 </style>
 </head>
 <body>
 <aside id="panel">
   <header>
-    <div class="brand">🗺️ Campus Navigator <small>CampusScope</small></div>
+    <div class="brand">🗺️ Campus Navigator <small>CampusScope</small><button class="theme-btn" id="themeBtn" title="Light / dark mode">🌓</button></div>
     <div class="tag">Where to go, how to get there, what's there.</div>
   </header>
   <form class="ask" id="askForm">
@@ -411,6 +413,15 @@ async function load() {
     if (b.hasAttribute("data-share")) shareRoute(b.dataset.from, b.dataset.to);
     else { setOrigin(b.dataset.to, true); navigate(b.dataset.to, b.dataset.from); }
   });
+
+  // Light / dark mode toggle (remembers your choice)
+  const savedTheme = store.get("nav-theme"); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+  $("#themeBtn").onclick = () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next; store.set("nav-theme", next);
+    if (DATA) { drawGraph(); drawMarkers(); }
+  };
 
   // Keyboard: "/" focuses search, Esc clears the route
   document.addEventListener("keydown", e => {
