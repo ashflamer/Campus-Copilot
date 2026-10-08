@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Campus Navigator</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#fffdf8; --ink:#1b1d1f; --muted:#6b6f75; --line:#e3ded2;
+  --accent:#a4123f; --accent-ink:#fff; --route:#a4123f; --acc:#1f7a5a; --chip:#f0ebe0;
+  --open:#1f7a5a; --closed:#b3261e; --unknown:#9a6b00; --shadow:0 8px 30px rgba(30,20,10,.12);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111214; --panel:#1a1c1f; --ink:#ecebe7; --muted:#9a9ea5; --line:#2c2f34;
+  --accent:#e0476f; --chip:#24272b; --open:#4cc38a; --closed:#f2766b; --unknown:#e0b04c; --shadow:0 8px 30px rgba(0,0,0,.45);
+}}
+*{box-sizing:border-box} html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif;display:flex;overflow:hidden}
+#panel{width:400px;max-width:100%;height:100%;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--line);z-index:500}
+#map{flex:1;height:100%}
+header{padding:18px 18px 10px}
+.brand{font:700 20px "Space Grotesk",system-ui,sans-serif;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+.brand small{font:500 11px Inter;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:99px}
+.tag{color:var(--muted);font-size:13px;margin-top:2px}
+.ask{margin:8px 18px 0;display:flex;gap:6px;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:6px}
+.ask:focus-within{border-color:var(--accent)}
+.ask input{flex:1;border:0;background:transparent;color:var(--ink);font:inherit;padding:8px;outline:0;min-width:0}
+.ask button{border:0;border-radius:10px;padding:0 12px;font:600 14px Inter;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.ask button.mic{background:var(--chip);color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center;margin:10px 18px 0;font-size:13px;color:var(--muted)}
+select{flex:1;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px}
+.gps{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:7px 10px;cursor:pointer;font:inherit}
+label.toggle{display:flex;gap:6px;align-items:center;white-space:nowrap;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 18px 4px}
+.chip{border:0;background:var(--chip);color:var(--ink);border-radius:99px;padding:6px 11px;font:500 13px Inter;cursor:pointer}
+.chip:hover{outline:1.5px solid var(--accent)}
+#out{flex:1;overflow:auto;padding:6px 18px 90px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.card h3{margin:0 0 4px;font:700 17px "Space Grotesk",system-ui,sans-serif}
+.reply{font-size:15px}
+.meta{color:var(--muted);font-size:12px;margin-top:6px}
+.big{display:flex;gap:18px;margin:10px 0}
+.big div{font:700 22px "Space Grotesk",system-ui,sans-serif} .big span{display:block;font:500 11px Inter;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.steps{margin:8px 0 0;padding-left:0;list-style:none}
+.steps li{padding:6px 0 6px 22px;border-left:2px solid var(--line);margin-left:6px;position:relative;font-size:14px}
+.steps li:before{content:"";position:absolute;left:-6px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--route)}
+.steps li:last-child:before{background:var(--ink)}
+.pill{display:inline-block;font:600 11px Inter;padding:2px 8px;border-radius:99px;margin-right:4px}
+.open{color:var(--open);background:color-mix(in srgb,var(--open) 14%,transparent)}
+.closed{color:var(--closed);background:color-mix(in srgb,var(--closed) 14%,transparent)}
+.unknown{color:var(--unknown);background:color-mix(in srgb,var(--unknown) 14%,transparent)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{border:0;border-radius:10px;padding:8px 12px;font:600 13px Inter;cursor:pointer;background:var(--chip);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.list button{display:flex;justify-content:space-between;width:100%;border:0;background:transparent;color:var(--ink);padding:8px 0;border-bottom:1px solid var(--line);font:inherit;cursor:pointer;text-align:left}
+.list button:last-child{border:0}
+.nc{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.nc .k{font:600 11px Inter;color:var(--accent);text-transform:uppercase;letter-spacing:.6px}
+.warn{color:var(--closed);font-weight:600}
+#help{position:fixed;right:16px;bottom:22px;z-index:1000;background:#c41e3a;color:#fff;border:0;border-radius:99px;padding:14px 20px;font:700 15px "Space Grotesk",system-ui,sans-serif;box-shadow:var(--shadow);cursor:pointer}
+.emg{border:2px solid #c41e3a}
+.emg a{color:inherit;font-weight:700}
+.emoji-pin{font-size:22px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));text-align:center}
+.emoji-pin.sel{font-size:30px}
+.node-pin{width:10px;height:10px;border-radius:50%;background:#555;border:2px solid #fff}
+.leaflet-tooltip{font:600 12px Inter}
+#editbar{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:1000;background:#1b1d1f;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;gap:10px;align-items:center}
+#editbar button{border:0;border-radius:8px;padding:6px 10px;font:600 12px Inter;cursor:pointer}
+.ai{font-size:11px;color:var(--muted);margin:6px 18px 0}
+@media (max-width:760px){
+  body{flex-direction:column-reverse}
+  #panel{width:100%;height:56%;border-right:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:var(--shadow)}
+  #map{height:44%}
+  header{padding:12px 16px 4px} .ask,.row,.chips{margin-left:16px;margin-right:16px} #out{padding:4px 16px 90px}
+  #help{bottom:auto;top:12px;right:12px;padding:10px 14px}
+}
+body.embed header{display:none}
+</style>
+</head>
+<body>
+<aside id="panel">
+  <header>
+    <div class="brand">🗺️ Campus Navigator <small>CampusScope</small></div>
+    <div class="tag">Where to go, how to get there, what's there.</div>
+  </header>
+  <form class="ask" id="askForm">
+    <input id="q" autocomplete="off" placeholder='Try "take me from the library to CSE"'>
+    <button type="button" class="mic" id="mic" title="Speak">🎤</button>
+    <button type="submit">Go</button>
+  </form>
+  <div class="row">
+    <span>From</span>
+    <select id="origin"><option value="">Pick start point…</option></select>
+    <button class="gps" id="gps" title="Use my location">📍</button>
+  </div>
+  <div class="row"><label class="toggle"><input type="checkbox" id="acc"> ♿ Step-free route</label></div>
+  <div class="chips" id="chips"></div>
+  <div class="ai" id="ai"></div>
+  <div id="out"></div>
+</aside>
+<div id="map"></div>
+<button id="help">🚨 HELP</button>
+<div id="editbar">✏️ Pin editor — drag pins to their real spots
+  <button id="saveEdits" style="background:#4cc38a">Save</button>
+  <button id="exitEdit" style="background:#eee">Exit</button>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script>
+  /* Prefer a local copy (static/vendor/leaflet) for offline demos; fall back to CDNs. */
+  if (!window.L) document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>');
+</script>
+<script>
+  if (!window.L) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>');
+</script>
+<script>
+const API = location.origin;
+const params = new URLSearchParams(location.search);
+if (params.get("embed") === "1") document.body.classList.add("embed");
+
+const ICON = {academic:"🏢", study:"📚", food:"🍴", medical:"🏥", sports:"🏃", security:"🛡️", store:"🛒", hostel:"🏠", admin:"🏛️"};
+const CHIPS = [["food","🍴 Food"],["study","📚 Study"],["medical","🏥 Medical"],["store","🛒 Store / Print / ATM"],["sports","🏃 Sports"],["security","🛡️ Security"],["__next","🎓 My next class"],["__open","🟢 Open now"]];
+
+let DATA, map, markers = {}, routeLayers = [], graphLayer, selected = null, editMode = false;
+const $ = s => document.querySelector(s);
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#a4123f";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const origin = () => $("#origin").value || null;
+const accessible = () => $("#acc").checked;
+const store = {get(k){try{return localStorage.getItem(k)}catch{return null}}, set(k,v){try{localStorage.setItem(k,v)}catch{}}};
+
+async function api(path, opts) {
+  const r = await fetch(API + path, opts);
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+function pillFor(open) {
+  const cls = open?.status || "unknown";
+  return `<span class="pill ${cls}">${cls === "open" ? "🟢" : cls === "closed" ? "🔴" : "🟡"} ${esc(open?.label || "Hours not verified")}</span>`;
+}
+
+function card(html, cls = "") {
+  const d = document.createElement("div");
+  d.className = "card " + cls;
+  d.innerHTML = html;
+  $("#out").prepend(d);
+  return d;
+}
+
+/* ---------------------------------------------------------------- map */
+function pinIcon(l, sel) {
+  return L.divIcon({className: "", html: `<div class="emoji-pin ${sel ? "sel" : ""}">${ICON[l.category] || "📍"}</div>`, iconSize: [30, 30], iconAnchor: [15, 15]});
+}
+
+function drawGraph() {
+  if (graphLayer) graphLayer.remove();
+  graphLayer = L.layerGroup().addTo(map);
+  const N = {...DATA.nodes};
+  DATA.locations.forEach(l => N[l.id] = l);
+  DATA.edges.forEach(e => {
+    const a = N[e.from], b = N[e.to];
+    if (a && b) L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {color: "#888", weight: 3, opacity: .35, dashArray: e.stairs ? "4 6" : null})
+      .bindTooltip(esc(e.name) + (e.stairs ? " · stairs" : "") + (e.covered ? " · covered" : ""), {sticky: true}).addTo(graphLayer);
+  });
+}
+
+function drawMarkers() {
+  Object.values(markers).forEach(m => m.remove());
+  markers = {};
+  DATA.locations.forEach(l => {
+    const m = L.marker([l.lat, l.lng], {icon: pinIcon(l), draggable: editMode, title: l.name}).addTo(map);
+    m.bindTooltip(esc(l.name), {direction: "top", offset: [0, -10]});
+    m.on("click", () => !editMode && showPlace(l.id));
+    markers[l.id] = m;
+  });
+  if (editMode) Object.entries(DATA.nodes).forEach(([id, n]) => {
+    const m = L.marker([n.lat, n.lng], {icon: L.divIcon({className: "", html: '<div class="node-pin"></div>', iconSize: [14, 14]}), draggable: true}).addTo(map);
+    m.bindTooltip(esc(n.label)); m._nodeId = id; markers["node:" + id] = m;
+  });
+}
+
+function select(id) {
+  if (selected && markers[selected]) markers[selected].setIcon(pinIcon(loc(selected)));
+  selected = id;
+  if (id && markers[id]) markers[id].setIcon(pinIcon(loc(id), true));
+}
+
+function clearRoute() { routeLayers.forEach(l => l.remove()); routeLayers = []; }
+
+function drawRoute(r, color) {
+  clearRoute();
+  if (!r) return;
+  const casing = L.polyline(r.polyline, {color: "#fff", weight: 10, opacity: .9}).addTo(map);
+  const line = L.polyline(r.polyline, {color: color || cssVar(r.accessible ? "--acc" : "--route"), weight: 6, lineCap: "round"}).addTo(map);
+  const start = L.circleMarker(r.polyline[0], {radius: 8, color: "#fff", weight: 3, fillColor: "#1f7a5a", fillOpacity: 1}).addTo(map).bindTooltip("Start");
+  routeLayers.push(casing, line, start);
+  map.fitBounds(line.getBounds(), {padding: [60, 60], maxZoom: 18});
+}
+
+const loc = id => DATA.locations.find(l => l.id === id);
+
+/* -------------------------------------------------------------- render */
+function routeBlock(r) {
+  if (!r) return "";
+  const steps = r.steps.map(s => `<li>${esc(s.via)} → <b>${esc(s.to)}</b> <span class="meta">${s.meters} m${s.stairs ? " · stairs" : ""}${s.covered ? " · covered" : ""}</span></li>`).join("");
+  return `<div class="big"><div>${r.distance_m} m<span>distance</span></div><div>${r.minutes} min<span>walk</span></div><div>${r.uses_stairs ? "🪜" : "♿"}<span>${r.uses_stairs ? "has stairs" : "step-free"}</span></div></div>
+          <ol class="steps"><li>Start: <b>${esc(loc(r.origin)?.name || r.origin)}</b></li>${steps}<li>Arrive: <b>${esc(loc(r.destination)?.name || r.destination)}</b></li></ol>`;
+}
+
+async function showPlace(id, fromAsk) {
+  const l = loc(id); if (!l) return;
+  select(id);
+  if (!fromAsk) map.panTo([l.lat, l.lng]);
+  const o = origin();
+  let r = null;
+  if (o && o !== id) { try { r = await api(`/api/route?from=${o}&to=${id}&accessible=${accessible()}`); } catch {} }
+  const d = card(`<h3>${ICON[l.category] || "📍"} ${esc(l.name)}</h3>
+    ${pillFor(l.open)} ${l.verified ? '<span class="pill open">✓ verified</span>' : '<span class="pill unknown">unverified</span>'}
+    <div class="meta" style="margin-top:8px">What's here</div><div>${l.inside.map(esc).join(" · ")}</div>
+    ${r ? `<div class="meta" style="margin-top:8px">From ${esc(loc(o)?.name)}: <b>${r.distance_m} m · ${r.minutes} min</b>${r.uses_stairs ? " · has stairs" : " · step-free"}</div>` : (o === id ? '<div class="meta">You are here.</div>' : "")}
+    <div class="btns">${o && o !== id ? `<button class="btn primary" data-nav>Navigate →</button><button class="btn" data-opts>Route options</button>` : ""}
+      <button class="btn" data-start>Set as start</button></div>`);
+  d.querySelector("[data-nav]")?.addEventListener("click", () => navigate(o, id));
+  d.querySelector("[data-opts]")?.addEventListener("click", () => routeOptions(o, id));
+  d.querySelector("[data-start]").addEventListener("click", () => setOrigin(id));
+}
+
+async function navigate(from, to) {
+  try {
+    const r = await api(`/api/route?from=${from}&to=${to}&accessible=${accessible()}`);
+    drawRoute(r); select(to);
+    card(`<h3>🧭 To ${esc(loc(to).name)}</h3>${routeBlock(r)}`);
+  } catch (e) { card(`<div class="reply">⚠️ ${esc(e.message)}${accessible() ? " (no step-free path mapped)" : ""}</div>`); }
+}
+
+async function routeOptions(from, to) {
+  const o = await api(`/api/options?from=${from}&to=${to}`);
+  const rows = [["🚶 Fastest", o.fastest]];
+  if (o.accessible) rows.push(["♿ Step-free", o.accessible]);
+  const d = card(`<h3>Route options → ${esc(loc(to).name)}</h3><div class="list">${rows.map(([n, r], i) =>
+    `<button data-i="${i}"><span>${n}</span><span><b>${r.minutes} min</b> · ${r.distance_m} m</span></button>`).join("")}</div>
+    ${o.fastest.accessible_ok ? '<div class="meta">The fastest route is already step-free ♿</div>' : ""}
+    ${o.accessible_unavailable ? '<div class="meta warn">No step-free route mapped yet.</div>' : ""}`);
+  d.querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => {
+    const r = rows[+b.dataset.i][1]; drawRoute(r);
+    card(`<h3>${rows[+b.dataset.i][0]} → ${esc(loc(to).name)}</h3>${routeBlock(r)}`);
+  }));
+  drawRoute(o.fastest);
+}
+
+function renderAnswer(res) {
+  let html = `<div class="reply">${esc(res.reply)}</div>`;
+  if (res.next_class) {
+    const n = res.next_class;
+    html = `<div class="k">🎓 Your next class</div><h3>${esc(n.course)}</h3>
+      <div>${esc(n.room)} · ${esc(n.room_info?.building || "building unknown")}${n.room_info?.floor != null ? " · floor " + n.room_info.floor : ""} · ${esc(n.start)}</div>
+      <div class="meta">${n.in_progress ? "In progress now" : "Starts in " + n.starts_in_min + " min"}</div>` + html;
+  }
+  if (res.emergency) {
+    html += `<div class="list" style="margin-top:8px">${res.emergency.map(c => `<button data-loc="${c.location}"><span>${c.icon} ${esc(c.label)}</span><span>${c.phone ? `<a href="tel:${esc(c.phone)}">📞 ${esc(c.phone)}</a>` : '<span class="meta">number not added</span>'}</span></button>`).join("")}</div>`;
+  }
+  if (res.places && res.places.length > 1) {
+    html += `<div class="list" style="margin-top:8px">${res.places.map(p => `<button data-loc="${p.id}"><span>${ICON[p.category] || "📍"} ${esc(p.name)}</span><span>${p.minutes != null ? `<b>${p.minutes} min</b>` : ""} ${pillFor(p.open)}</span></button>`).join("")}</div>`;
+  }
+  if (res.route) html += routeBlock(res.route);
+  const dest = res.destination;
+  html += `<div class="btns">${dest && !res.route ? `<button class="btn" data-loc="${dest}">Show on map</button>` : ""}
+    ${res.route ? `<button class="btn" data-opts>Route options</button>` : ""}</div>
+    <div class="meta">understood by: ${esc(res.parsed?.parser || "")}</div>`;
+  const d = card(html, (res.next_class ? "nc " : "") + (res.emergency ? "emg" : ""));
+  d.querySelectorAll("[data-loc]").forEach(b => b.addEventListener("click", e => { if (e.target.closest("a")) return; showPlace(b.dataset.loc); }));
+  d.querySelector("[data-opts]")?.addEventListener("click", () => routeOptions(res.route.origin, res.route.destination));
+  if (res.route) drawRoute(res.route, res.emergency ? "#c41e3a" : null);
+  if (dest) { select(dest); if (!res.route) map.panTo([loc(dest).lat, loc(dest).lng]); }
+  if (res.parsed?.origin && res.parsed.origin !== origin()) setOrigin(res.parsed.origin, true);
+}
+
+async function ask(text) {
+  text = (text || "").trim(); if (!text) return;
+  const q = accessible() && !/accessible|stairs|wheelchair/i.test(text) ? text + " (accessible route)" : text;
+  const wait = card(`<div class="meta">Thinking… “${esc(text)}”</div>`);
+  try {
+    const res = await api("/api/ask", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text: q, origin: origin()})});
+    wait.remove(); renderAnswer(res);
+  } catch (e) { wait.innerHTML = `<div class="reply">⚠️ ${esc(e.message)}</div>`; }
+}
+
+function setOrigin(id, quiet) {
+  $("#origin").value = id || ""; store.set("nav-origin", id || "");
+  if (!quiet && id) card(`<div class="meta">Start point set to <b>${esc(loc(id)?.name)}</b></div>`);
+}
+
+/* ---------------------------------------------------------------- GPS */
+function nearestLocation(lat, lng) {
+  let best = null, bd = 1e12;
+  DATA.locations.forEach(l => { const d = (l.lat - lat) ** 2 + ((l.lng - lng) * Math.cos(lat * Math.PI / 180)) ** 2; if (d < bd) { bd = d; best = l; } });
+  return {loc: best, meters: Math.sqrt(bd) * 111320};
+}
+$("#gps").addEventListener("click", () => {
+  if (!navigator.geolocation) return card('<div class="reply">GPS not available — pick your start point from the list.</div>');
+  navigator.geolocation.getCurrentPosition(p => {
+    const {loc: l, meters} = nearestLocation(p.coords.latitude, p.coords.longitude);
+    if (meters > 1500) return card(`<div class="reply">You seem to be off campus (${Math.round(meters / 1000)} km away). Pick a start point manually.</div>`);
+    setOrigin(l.id, true);
+    card(`<div class="reply">📍 Snapped to nearest place: <b>${esc(l.name)}</b> (~${Math.round(meters)} m away)</div>`);
+  }, () => card('<div class="reply">Couldn\'t get GPS — pick your start point from the list.</div>'), {enableHighAccuracy: true, timeout: 8000});
+});
+
+/* --------------------------------------------------------------- editor */
+function setEdit(on) {
+  editMode = on; $("#editbar").style.display = on ? "flex" : "none"; drawMarkers();
+  if (on) { clearRoute(); drawGraph(); }
+}
+document.addEventListener("keydown", e => { if (e.key.toLowerCase() === "e" && e.altKey) setEdit(!editMode); });
+$("#exitEdit").addEventListener("click", () => setEdit(false));
+$("#saveEdits").addEventListener("click", async () => {
+  const body = {locations: {}, nodes: {}};
+  Object.entries(markers).forEach(([k, m]) => { const ll = m.getLatLng(); if (k.startsWith("node:")) body.nodes[k.slice(5)] = [ll.lat, ll.lng]; else body.locations[k] = [ll.lat, ll.lng]; });
+  const r = await api("/api/editor/save", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  await load(); setEdit(true);
+  card(`<div class="reply">✅ Saved ${r.saved} positions. Distances recalculated.</div>`);
+});
+
+/* ---------------------------------------------------------------- init */
+async function load() {
+  DATA = await api("/api/campus");
+  $("#ai").textContent = DATA.ai.provider === "none" ? "AI: keyword parser (Gemma off)" : `AI: Gemma via ${DATA.ai.provider} · ${DATA.ai.model}`;
+  drawGraph(); drawMarkers();
+}
+
+(async function init() {
+  map = L.map("map", {zoomControl: false}).setView([10.903, 76.9005], 17);
+  L.control.zoom({position: "topleft"}).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20, maxNativeZoom: 19, attribution: "© OpenStreetMap"}).addTo(map);
+  try { await load(); } catch (e) { card(`<div class="reply">⚠️ Can't reach the Navigator server: ${esc(e.message)}</div>`); return; }
+  map.setView(DATA.campus.center, DATA.campus.zoom);
+
+  const sel = $("#origin");
+  [...DATA.locations].sort((a, b) => a.name.localeCompare(b.name)).forEach(l => sel.add(new Option(`${ICON[l.category] || "📍"} ${l.name}`, l.id)));
+  sel.addEventListener("change", () => setOrigin(sel.value));
+  const saved = store.get("nav-origin"); if (saved && loc(saved)) sel.value = saved;
+
+  CHIPS.forEach(([k, label]) => {
+    const b = document.createElement("button"); b.className = "chip"; b.textContent = label;
+    b.onclick = () => k === "__next" ? ask("where is my next class") : k === "__open" ? ask("what food place is open now near me") : ask(`nearest ${k}`);
+    $("#chips").append(b);
+  });
+
+  $("#askForm").addEventListener("submit", e => { e.preventDefault(); ask($("#q").value); $("#q").value = ""; });
+  $("#help").addEventListener("click", () => ask("medical emergency"));
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) {
+    const rec = new SR(); rec.lang = "en-IN"; rec.interimResults = false;
+    rec.onresult = e => { const t = e.results[0][0].transcript; $("#q").value = t; ask(t); };
+    rec.onend = () => $("#mic").textContent = "🎤";
+    $("#mic").onclick = () => { $("#mic").textContent = "⏺"; rec.start(); };
+  } else $("#mic").style.display = "none";
+
+  // Deep links from CampusScope: ?from=central_library&to=ab3 | ?room=A-402 | ?q=... | ?accessible=1 | ?next=1
+  if (params.get("accessible") === "1") $("#acc").checked = true;
+  if (params.get("from")) setOrigin(params.get("from"), true);
+  if (params.get("q")) ask(params.get("q"));
+  else if (params.get("room")) ask(`take me to ${params.get("room")}`);
+  else if (params.get("next") === "1") ask("where is my next class");
+  else if (params.get("to")) { const id = params.get("to"); origin() ? navigate(origin(), id) : showPlace(id); }
+  else card(`<h3>Hi 👋</h3><div class="reply">Ask anything like <i>“take me from the library to CSE”</i>, <i>“nearest canteen”</i>, <i>“where is A-402”</i> or tap a category. Tap any pin to see what's inside.</div>
+    <div class="meta">Tip: pick your start point above · Alt+E opens the pin editor</div>`);
+})();
+</script>
+</body>
+</html>
