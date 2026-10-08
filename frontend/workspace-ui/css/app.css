@@ -75,9 +75,18 @@ main{max-width:1200px;margin:16px auto 40px;padding:0 16px}
 .plan-item:last-child{border:0}
 .plan-item .when{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
 .plan-tip{margin-top:10px;padding:10px;border-radius:10px;background:var(--chip);font-size:14px}
+.nc-course{font-size:20px;font-weight:700;line-height:1.2}
+.nc .chip{font-size:13px}
 .slots{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
 
-table.tt{width:100%;border-collapse:collapse}
+/* Phone fix: the table keeps its width and the wrapper scrolls sideways instead of squashing the inputs. */
+.tt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+table.tt{width:100%;min-width:620px;border-collapse:collapse}
+.tt-room-cell{flex-wrap:nowrap}
+.tt-room-cell input{flex:1}
+.tt input[type="time"]{min-width:110px}
+.tt-empty td{text-align:center}
+.bad{outline:2px solid var(--bad);outline-offset:1px}
 .tt th{text-align:left;font-size:12px;color:var(--muted);padding:6px}
 .tt td{padding:4px}
 .tt input,.tt select{width:100%}
