@@ -1,6 +1,8 @@
 // App shell: tabs, theme toggle, AI status chip, and wiring for My Day + Timetable.
+import { NAV, PROXY_NAV } from "./config.js";
 import { api } from "./api.js";
-import { $, $$, toast } from "./util.js";
+import { $, $$ } from "./util.js";
+import { refresh as refreshBoard } from "./board.js";
 import { initMyDay, refreshMyDay } from "./myday.js";
 import { initTimetable } from "./timetable.js";
 
@@ -42,16 +44,23 @@ async function checkAI() {
   }
 }
 
-// ------------------------------------------------------------ quick-add (Board, hours 3)
-// The quick-add bar is part of the Board build; until that lands it must not
-// submit the form and reload the page.
-$("#quick-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  toast("Quick-add is wired up with the Board tab");
-});
+// ------------------------------------------------------------ navigator widget
+// Loads widget.js (floating 🗺️ Campus button + Navigate pop-ups). Tries the navigator
+// directly, then through serve.py's same-origin proxy for hosted previews.
+function loadWidget() {
+  const tryLoad = (base) => new Promise((res) => {
+    const s = document.createElement("script");
+    s.src = `${base}/widget.js`; s.dataset.nav = base;
+    s.onload = () => res(true); s.onerror = () => { s.remove(); res(false); };
+    document.body.appendChild(s);
+  });
+  return tryLoad(NAV).then((ok) => ok || NAV === PROXY_NAV ? ok : tryLoad(PROXY_NAV));
+}
 
 // ------------------------------------------------------------ boot
 checkAI();
+loadWidget();
+refreshBoard();          // board.js also wires the Gemma quick-add bar
 initMyDay();
 initTimetable(() => {
   // A saved timetable changes the next-class card and the day plan.

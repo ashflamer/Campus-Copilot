@@ -1,0 +1,96 @@
+/* Arcade FX layer - animations, transitions and game-feel for the workspace */
+@import url("https://fonts.googleapis.com/css2?family=Bungee&family=Press+Start+2P&display=swap");
+
+:root{--neon:#ff3d7f;--neon2:#ffb84d;--neon3:#3dffb5;--glow:0 0 0 1px color-mix(in srgb,var(--neon) 40%,transparent),0 8px 28px color-mix(in srgb,var(--neon) 28%,transparent)}
+
+/* animated aurora background + star field */
+body{background:radial-gradient(1200px 600px at 10% -10%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%),
+  radial-gradient(900px 500px at 110% 10%,color-mix(in srgb,#f2a541 14%,transparent),transparent 60%),
+  radial-gradient(800px 600px at 50% 120%,color-mix(in srgb,#4cc38a 12%,transparent),transparent 60%),var(--bg);
+  background-attachment:fixed;animation:aurora 18s ease-in-out infinite alternate}
+@keyframes aurora{0%{background-position:0 0,0 0,0 0}100%{background-position:60px 40px,-80px 30px,40px -60px}}
+#fx-stars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
+.top,main,.quick{position:relative;z-index:1}
+
+/* brand + headings: arcade type */
+.brand b{font-family:Bungee,system-ui,sans-serif;letter-spacing:1px;background:linear-gradient(90deg,var(--accent),#f2a541,#4cc38a,var(--accent));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+.brand .logo{display:inline-block;animation:bob 2.6s ease-in-out infinite}
+@keyframes shine{to{background-position:300% 0}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.col h3{font-family:Bungee,system-ui,sans-serif;letter-spacing:1px}
+.card h3{font-family:Bungee,system-ui,sans-serif;font-weight:400;letter-spacing:.5px}
+
+/* tabs: sliding pill */
+.tabs{position:relative}
+.tabs button{position:relative;z-index:1;transition:color .25s}
+.tabs button.on{background:transparent;box-shadow:none;color:#fff}
+.tabs .pill{position:absolute;z-index:0;top:4px;bottom:4px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#f2a541);box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 40%,transparent);transition:left .35s cubic-bezier(.3,1.4,.5,1),width .35s cubic-bezier(.3,1.4,.5,1)}
+
+/* tab content transition */
+.tab.on{animation:tabIn .45s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes tabIn{from{opacity:0;transform:translateY(14px) scale(.985);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+
+/* quick-add: glowing input */
+#quick-form{transition:box-shadow .3s,transform .3s}
+#quick-form:focus-within{box-shadow:var(--glow);transform:translateY(-2px)}
+.spark{display:inline-block;animation:spin 4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* cards: staggered entrance, 3D tilt, glow */
+.task{animation:dealIn .5s cubic-bezier(.2,.9,.3,1.2) both;transform-style:preserve-3d;transition:transform .18s ease,box-shadow .25s ease}
+.task:hover{box-shadow:var(--glow)}
+@keyframes dealIn{from{opacity:0;transform:translateY(24px) rotateX(18deg) scale(.95)}to{opacity:1;transform:none}}
+.card{animation:dealIn .5s cubic-bezier(.2,.9,.3,1.2) both}
+.task .bar i,.player .bar i{background-size:200% 100%!important;background-image:linear-gradient(90deg,var(--accent),#f2a541,var(--accent))!important;animation:shimmer 2.2s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.task.won{animation:dealIn .5s both,wonGlow 2.4s ease-in-out infinite}
+@keyframes wonGlow{0%,100%{box-shadow:0 0 0 1px color-mix(in srgb,#4cc38a 40%,transparent),var(--shadow)}50%{box-shadow:0 0 0 2px #4cc38a,0 0 26px color-mix(in srgb,#4cc38a 45%,transparent)}}
+.task.boss{animation:dealIn .5s both,bossShake 3.2s ease-in-out infinite}
+@keyframes bossShake{0%,92%,100%{transform:none}94%{transform:translateX(-3px) rotate(-.6deg)}96%{transform:translateX(3px) rotate(.6deg)}98%{transform:translateX(-2px)}}
+.task .reward{animation:coin 2.4s ease-in-out infinite}
+@keyframes coin{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.task.zap{animation:zap .6s ease}
+@keyframes zap{0%{transform:scale(1)}30%{transform:scale(1.04) rotate(-1deg);box-shadow:0 0 0 3px #f2a541,0 0 40px #f2a541}100%{transform:scale(1)}}
+
+/* buttons: press + ripple */
+button{position:relative;overflow:hidden;transition:transform .12s ease,box-shadow .2s,border-color .2s}
+button:active{transform:scale(.94)}
+button.primary:hover{box-shadow:0 6px 20px color-mix(in srgb,var(--accent) 45%,transparent)}
+.ripple{position:absolute;border-radius:50%;pointer-events:none;background:rgba(255,255,255,.55);transform:scale(0);animation:ripple .6s ease-out forwards}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+
+/* player card: level glow */
+.player .lvl{animation:lvlGlow 2.4s ease-in-out infinite}
+@keyframes lvlGlow{0%,100%{box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 35%,transparent)}50%{box-shadow:0 0 0 3px color-mix(in srgb,#f2a541 50%,transparent),0 0 22px color-mix(in srgb,#f2a541 60%,transparent)}}
+.player.bump{animation:bump .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* combo + level-up overlay */
+#fx-combo{position:fixed;right:24px;top:96px;z-index:100003;font:400 22px Bungee,system-ui;color:#fff;background:linear-gradient(135deg,var(--accent),#f2a541);padding:8px 16px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);transform:scale(0) rotate(-12deg);transition:transform .3s cubic-bezier(.3,1.7,.5,1);pointer-events:none}
+#fx-combo.on{transform:scale(1) rotate(-6deg)}
+#fx-levelup{position:fixed;inset:0;z-index:100004;display:none;place-items:center;pointer-events:none;background:radial-gradient(circle,rgba(0,0,0,.35),rgba(0,0,0,.65))}
+#fx-levelup.on{display:grid;animation:fadeOut 2.4s ease forwards}
+#fx-levelup .big{font:400 clamp(28px,6vw,64px) "Press Start 2P",Bungee,monospace;color:#fff;text-shadow:0 0 12px #f2a541,0 0 32px var(--accent);animation:zoomIn .7s cubic-bezier(.3,1.7,.5,1);text-align:center;line-height:1.4}
+#fx-levelup .big small{display:block;font:400 clamp(14px,2vw,20px) Bungee,system-ui;color:#ffe2a8;margin-top:8px}
+@keyframes zoomIn{from{transform:scale(.2) rotate(-10deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadeOut{0%,75%{opacity:1}100%{opacity:0}}
+
+/* intro splash */
+#fx-splash{position:fixed;inset:0;z-index:100010;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#2a0f1d,#0d0b10 70%);color:#fff;cursor:pointer;transition:opacity .6s,transform .6s}
+#fx-splash.out{opacity:0;transform:scale(1.08);pointer-events:none}
+#fx-splash .logo{font-size:72px;animation:bob 2s ease-in-out infinite;text-align:center}
+#fx-splash h1{margin:6px 0 0;font:400 clamp(30px,6vw,64px) Bungee,system-ui;background:linear-gradient(90deg,#ff3d7f,#ffb84d,#3dffb5,#ff3d7f);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite;text-align:center}
+#fx-splash .sub{text-align:center;color:#cfc9be;margin-top:6px;font-size:14px}
+#fx-splash .press{margin-top:28px;text-align:center;font:400 14px "Press Start 2P",monospace;color:#ffe2a8;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* sound toggle */
+#fx-sound{font-size:15px;padding:6px 10px}
+
+/* chips & toasts get a little bounce */
+.chip{transition:transform .2s}
+.chip:hover{transform:translateY(-2px)}
+.gtoast.show .ic{animation:gpop .6s ease,wiggle 1.2s ease .6s}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+
+@media (prefers-reduced-motion:reduce){body,#fx-stars,.task,.card,.tab.on,.brand b,.brand .logo,.player .lvl,.task .reward{animation:none!important}#fx-splash{display:none}}

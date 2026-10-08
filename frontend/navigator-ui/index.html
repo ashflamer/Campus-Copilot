@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="fx.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -78,6 +79,17 @@ label.toggle{display:flex;gap:6px;align-items:center;white-space:nowrap;cursor:p
 .recent button{border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:3px 10px;font:500 12px Inter;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .recent button:hover{border-color:var(--accent)}
 .eta{color:var(--accent)}
+.legend{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);font:12px Inter,sans-serif;padding:8px 10px;min-width:150px}
+.legend summary{cursor:pointer;font-weight:600;list-style:none}
+.legend summary::-webkit-details-marker{display:none}
+.legend .li{display:flex;align-items:center;gap:8px;padding:2px 0}
+.legend .ln{width:26px;height:0;border-top:4px solid var(--route);border-radius:2px}
+.legend .ln.path{border-top:3px solid #888;opacity:.6}
+.legend .ln.stairs{border-top:3px dashed #888;opacity:.8}
+.legend .ln.acc{border-top-color:var(--acc)}
+.favs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 18px 0;font-size:12px;color:var(--muted);align-items:center}
+.favs button{border:1px solid color-mix(in srgb,#f2a541 60%,var(--line));background:color-mix(in srgb,#f2a541 12%,transparent);color:var(--ink);border-radius:99px;padding:3px 10px;font:500 12px Inter;cursor:pointer}
+.btn.fav-on{background:color-mix(in srgb,#f2a541 25%,var(--chip))}
 kbd{font:600 11px Inter;background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:0 5px}
 @media (max-width:760px){
   body{flex-direction:column-reverse}
@@ -87,12 +99,14 @@ kbd{font:600 11px Inter;background:var(--chip);border:1px solid var(--line);bord
   #help{bottom:auto;top:12px;right:12px;padding:10px 14px}
 }
 body.embed header{display:none}
+:root[data-theme="dark"]{--bg:#111214;--panel:#1a1c1f;--ink:#ecebe7;--muted:#9a9ea5;--line:#2c2f34;--accent:#e0476f;--chip:#24272b;--open:#4cc38a;--closed:#f2766b;--unknown:#e0b04c;--shadow:0 8px 30px rgba(0,0,0,.45)}
+.theme-btn{margin-left:auto;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;width:34px;height:30px;cursor:pointer;font-size:15px}
 </style>
 </head>
 <body>
 <aside id="panel">
   <header>
-    <div class="brand">🗺️ Campus Navigator <small>CampusScope</small></div>
+    <div class="brand">🗺️ Campus Navigator <small>CampusScope</small><button class="theme-btn" id="themeBtn" title="Light / dark mode">🌓</button></div>
     <div class="tag">Where to go, how to get there, what's there.</div>
   </header>
   <form class="ask" id="askForm">
@@ -106,6 +120,7 @@ body.embed header{display:none}
     <button class="gps" id="gps" title="Use my location">📍</button>
   </div>
   <div class="row"><label class="toggle"><input type="checkbox" id="acc"> ♿ Step-free route</label></div>
+  <div class="favs" id="favs"></div>
   <div class="recent" id="recent"></div>
   <div class="chips" id="chips"></div>
   <div class="ai" id="ai"></div>
@@ -127,7 +142,8 @@ body.embed header{display:none}
   if (!window.L) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>');
 </script>
 <script>
-const API = location.origin;
+// works at the site root (:8765/) and behind a path prefix (e.g. the workspace proxy /svc/nav/)
+const API = location.origin + location.pathname.replace(/\/[^/]*$/, "");
 const params = new URLSearchParams(location.search);
 if (params.get("embed") === "1") document.body.classList.add("embed");
 
@@ -239,6 +255,21 @@ async function shareRoute(from, to) {
   } catch { card(`<div class="reply">🔗 Copy this link: <span class="meta">${esc(url)}</span></div>`); }
 }
 
+/* favourite places: one tap to route there from your start point */
+const FAV_KEY = "nav-favs";
+function favList() { try { return JSON.parse(store.get(FAV_KEY) || "[]").filter(id => loc(id)); } catch { return []; } }
+function isFav(id) { return favList().includes(id); }
+function toggleFav(id) {
+  const list = favList(); const i = list.indexOf(id);
+  i >= 0 ? list.splice(i, 1) : list.push(id);
+  store.set(FAV_KEY, JSON.stringify(list.slice(0, 8))); renderFavs();
+}
+function renderFavs() {
+  const list = favList(), el = $("#favs");
+  el.innerHTML = list.length ? `<span>★ Saved:</span>` + list.map(id => `<button data-id="${id}">${ICON[loc(id).category] || "📍"} ${esc(loc(id).name)}</button>`).join("") : "";
+  el.querySelectorAll("button").forEach(b => b.onclick = () => (origin() && origin() !== b.dataset.id) ? navigate(origin(), b.dataset.id) : showPlace(b.dataset.id));
+}
+
 const RECENT_KEY = "nav-recent";
 function recentList() { try { return JSON.parse(store.get(RECENT_KEY) || "[]"); } catch { return []; } }
 function addRecent(text) {
@@ -274,10 +305,13 @@ async function showPlace(id, fromAsk) {
     <div class="meta" style="margin-top:8px">What's here</div><div>${l.inside.map(esc).join(" · ")}</div>
     ${r ? `<div class="meta" style="margin-top:8px">From ${esc(loc(o)?.name)}: <b>${r.distance_m} m · ${r.minutes} min</b>${r.uses_stairs ? " · has stairs" : " · step-free"}</div>` : (o === id ? '<div class="meta">You are here.</div>' : "")}
     <div class="btns">${o && o !== id ? `<button class="btn primary" data-nav>Navigate →</button><button class="btn" data-opts>Route options</button>` : ""}
-      <button class="btn" data-start>Set as start</button></div>`);
+      <button class="btn" data-start>Set as start</button><button class="btn ${isFav(id) ? "fav-on" : ""}" data-fav>${isFav(id) ? "★ Saved" : "☆ Save place"}</button></div>`);
   d.querySelector("[data-nav]")?.addEventListener("click", () => navigate(o, id));
   d.querySelector("[data-opts]")?.addEventListener("click", () => routeOptions(o, id));
   d.querySelector("[data-start]").addEventListener("click", () => setOrigin(id));
+  d.querySelector("[data-fav]").addEventListener("click", e => {
+    toggleFav(id); e.target.textContent = isFav(id) ? "★ Saved" : "☆ Save place"; e.target.classList.toggle("fav-on", isFav(id));
+  });
 }
 
 async function navigate(from, to) {
@@ -377,6 +411,23 @@ $("#saveEdits").addEventListener("click", async () => {
   card(`<div class="reply">✅ Saved ${r.saved} positions. Distances recalculated.</div>`);
 });
 
+/* -------------------------------------------------------------- legend */
+function addLegend() {
+  const Legend = L.Control.extend({
+    onAdd() {
+      const d = L.DomUtil.create("details", "legend");
+      d.open = !matchMedia("(max-width:760px)").matches;
+      const kinds = [["academic", "Academic block"], ["study", "Library / study"], ["food", "Food"], ["medical", "Medical"], ["sports", "Sports"], ["hostel", "Hostel"], ["store", "Store / print / ATM"], ["security", "Gate / security"], ["admin", "Admin"]];
+      d.innerHTML = `<summary>🗺️ Legend</summary>${kinds.map(([k, n]) => `<div class="li"><span>${ICON[k]}</span>${n}</div>`).join("")}
+        <div class="li"><span class="ln"></span>Your route</div><div class="li"><span class="ln acc"></span>Step-free route</div>
+        <div class="li"><span class="ln path"></span>Walkway</div><div class="li"><span class="ln stairs"></span>Has stairs</div>`;
+      L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+      return d;
+    }
+  });
+  new Legend({position: "bottomleft"}).addTo(map);
+}
+
 /* ---------------------------------------------------------------- init */
 async function load() {
   DATA = await api("/api/campus");
@@ -387,6 +438,7 @@ async function load() {
 (async function init() {
   map = L.map("map", {zoomControl: false}).setView([10.903, 76.9005], 17);
   L.control.zoom({position: "topleft"}).addTo(map);
+  addLegend();
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20, maxNativeZoom: 19, attribution: "© OpenStreetMap"}).addTo(map);
   try { await load(); } catch (e) { card(`<div class="reply">⚠️ Can't reach the Navigator server: ${esc(e.message)}</div>`); return; }
   map.setView(DATA.campus.center, DATA.campus.zoom);
@@ -412,12 +464,21 @@ async function load() {
     else { setOrigin(b.dataset.to, true); navigate(b.dataset.to, b.dataset.from); }
   });
 
+  // Light / dark mode toggle (remembers your choice)
+  const savedTheme = store.get("nav-theme"); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+  $("#themeBtn").onclick = () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next; store.set("nav-theme", next);
+    if (DATA) { drawGraph(); drawMarkers(); }
+  };
+
   // Keyboard: "/" focuses search, Esc clears the route
   document.addEventListener("keydown", e => {
     if (e.key === "/" && document.activeElement !== $("#q")) { e.preventDefault(); $("#q").focus(); }
     if (e.key === "Escape") { clearRoute(); $("#q").blur(); }
   });
-  renderRecent();
+  renderRecent(); renderFavs();
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SR) {
@@ -439,5 +500,6 @@ async function load() {
 })();
 </script>
 <script src="game.js"></script>
+<script src="fx.js"></script>
 </body>
 </html>
