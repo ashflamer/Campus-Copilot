@@ -7,6 +7,7 @@ Served by `backend/navigator-api` at http://localhost:8765 (override with `NAV_S
 |---|---|
 | `index.html` | map, search box, voice input, category chips, route cards, HELP, pin editor |
 | `game.js`, `game.css` | Campus Explorer gamification layer (XP, levels, badges) |
+| `fx.js`, `fx.css` | Arcade FX: animations, transitions, sound effects |
 | `widget.js` | `CampusNav.open()`, `CampusNav.nextClassCard()`, `CampusNav.linkRooms()`, floating 🗺️ button |
 | `integration-demo.html` | example of embedding in another page |
 | `vendor/leaflet/` | Leaflet 1.9 (BSD-2-Clause), bundled so it works without a CDN |
@@ -33,3 +34,11 @@ Deep links: `/?room=A-402&from=central_library`, `/?q=nearest%20canteen`, `/?nex
 - **8 badges**: First Steps 🥾, Explorer 🧭, Scholar 📚, Foodie 🍴, Ally ♿, Campus Guide 🔗, 1 km Club 🏃, Campus Master 🏆. Click the level card to see them all.
 - Visited places get a green ✓ on the map; level-ups and badges show a toast and confetti.
 - **Safety first**: HELP / emergency routes never give XP. Progress is stored only in your browser and can be reset.
+
+## 🕹️ Arcade FX
+
+`fx.js` + `fx.css` add game feel on top of everything, without touching map logic:
+routes draw themselves and then "march", the start point pulses like radar, pins drop in and the
+selected pin bounces, cards spring in, the HELP button pulses, level-ups get a full-screen
+**LEVEL UP!** overlay, and tiny 8-bit sound effects play (🔊 button to mute). All motion is
+disabled automatically for users with "reduce motion" turned on.
