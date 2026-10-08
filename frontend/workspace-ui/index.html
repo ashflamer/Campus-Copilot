@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusScope Workspace</title>
+<meta name="description" content="CampusScope: assignments, timetable and campus navigation for Amrita Coimbatore, powered by Gemma 4.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">🎓</span><div><b>CampusScope</b><small>what to do · where to go</small></div></div>
+  <nav class="tabs" role="tablist">
+    <button data-tab="board" class="on">Board</button>
+    <button data-tab="myday">My Day</button>
+    <button data-tab="timetable">Timetable</button>
+  </nav>
+  <div class="right">
+    <span id="ai-chip" class="chip" title="Which model is answering">AI: checking…</span>
+    <button id="theme" class="icon" title="Toggle theme">◐</button>
+  </div>
+</header>
+
+<section class="quick">
+  <form id="quick-form">
+    <span class="spark">✨</span>
+    <input id="quick-input" autocomplete="off" placeholder="Tell Gemma: “MIS-1 report due friday 5pm in D-102, urgent”">
+    <button class="primary" id="quick-btn">Add</button>
+  </form>
+  <div id="quick-result" class="quick-result" hidden></div>
+</section>
+
+<main>
+  <section id="tab-board" class="tab on">
+    <div class="board">
+      <div class="col" data-status="todo"><h3>To do <span class="count"></span></h3><div class="list"></div></div>
+      <div class="col" data-status="doing"><h3>In progress <span class="count"></span></h3><div class="list"></div></div>
+      <div class="col" data-status="done"><h3>Done <span class="count"></span></h3><div class="list"></div></div>
+    </div>
+  </section>
+
+  <section id="tab-myday" class="tab">
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="row between"><h3>📍 Next class</h3>
+            <label class="small">from <select id="origin"></select></label></div>
+          <div id="next-class"></div>
+        </div>
+        <div class="card"><h3>⏰ Overdue & due today</h3><div id="due-list"></div></div>
+        <div class="card"><h3>📊 Progress</h3><div id="progress"></div></div>
+      </div>
+      <div>
+        <div class="card plan">
+          <div class="row between"><h3>🗓️ Today's plan</h3><button id="plan-btn" class="primary">✨ Plan my day</button></div>
+          <p class="muted small">Gemma 4 fits your most urgent work into today's free gaps between classes. Free slots are computed from your timetable; Gemma only picks the order and the reason.</p>
+          <div id="plan"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-timetable" class="tab">
+    <div class="card">
+      <div class="row between"><h3>🕐 Weekly timetable</h3>
+        <div class="row"><button id="tt-add">+ Row</button><button id="tt-save" class="primary">Save</button></div></div>
+      <p class="muted small">Room codes link to the Campus Navigator (room → building → walking route).</p>
+      <table class="tt"><thead><tr><th>Day</th><th>Start</th><th>End</th><th>Course</th><th>Room</th><th></th></tr></thead><tbody id="tt-body"></tbody></table>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
