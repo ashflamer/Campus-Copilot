@@ -1,0 +1,6 @@
+# CampusScope has NO third-party Python packages.
+# Both backends use only the Python 3.9+ standard library
+# (http.server, sqlite3, json, urllib, heapq, math, re, datetime).
+#
+# Optional, for running tests with pytest instead of plain python:
+# pytest>=7

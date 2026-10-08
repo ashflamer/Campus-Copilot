@@ -1,0 +1,8 @@
+{
+  "_note": "ONLY verified numbers. Copy them from the official intranet intercom address book. Leave phone as null if not verified — the UI shows 'number not added' instead of guessing.",
+  "contacts": [
+    {"id": "medical",   "label": "Amrita Dispensary (24/7)", "icon": "🏥", "phone": null, "location": "dispensary"},
+    {"id": "ambulance", "label": "Ambulance",                "icon": "🚑", "phone": null, "location": "dispensary"},
+    {"id": "security",  "label": "Security Office",          "icon": "🛡️", "phone": null, "location": "security_office"}
+  ]
+}

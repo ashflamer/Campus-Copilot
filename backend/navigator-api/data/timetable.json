@@ -1,0 +1,12 @@
+{
+  "_note": "DEMO timetable. CampusScope can replace this by POSTing its own entries to /api/next-class. day: 0=Mon ... 6=Sun.",
+  "entries": [
+    {"day": 0, "start": "09:00", "end": "09:50", "course": "Computational Thinking", "room": "D-102"},
+    {"day": 0, "start": "11:00", "end": "11:50", "course": "AI Lab", "room": "A-402"},
+    {"day": 1, "start": "10:00", "end": "10:50", "course": "Elements of Computing", "room": "B-201"},
+    {"day": 2, "start": "14:00", "end": "14:50", "course": "MIS-1", "room": "D-102"},
+    {"day": 3, "start": "11:00", "end": "11:50", "course": "AI Lab", "room": "A-402"},
+    {"day": 3, "start": "14:00", "end": "14:50", "course": "Computational Mechanics", "room": "C-305"},
+    {"day": 4, "start": "09:00", "end": "09:50", "course": "Smart Grid Security", "room": "N-101"}
+  ]
+}

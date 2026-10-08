@@ -1,0 +1,31 @@
+{
+  "_note": "Walkable path graph. Junction coordinates are APPROXIMATE — fix with the Pin Editor. Distances are computed automatically from coordinates (haversine). Each location in locations.json links to its 'node' automatically. Mark stairs/covered honestly after walking the path.",
+  "nodes": {
+    "j_gate":    {"lat": 10.9001, "lng": 76.9030, "label": "Main Gate junction"},
+    "j_main":    {"lat": 10.9014, "lng": 76.9022, "label": "Main Block junction"},
+    "j_lib":     {"lat": 10.9025, "lng": 76.9010, "label": "Library junction"},
+    "j_ab1":     {"lat": 10.9032, "lng": 76.9021, "label": "AB-I junction"},
+    "j_canteen": {"lat": 10.9040, "lng": 76.9006, "label": "IT Canteen junction"},
+    "j_ab2":     {"lat": 10.9035, "lng": 76.8998, "label": "AB-II junction"},
+    "j_ab3":     {"lat": 10.9046, "lng": 76.8990, "label": "AB-III junction"},
+    "j_sports":  {"lat": 10.9050, "lng": 76.8977, "label": "Sports junction"},
+    "j_hostel":  {"lat": 10.9055, "lng": 76.9013, "label": "Hostel junction"},
+    "j_mba":     {"lat": 10.9015, "lng": 76.8996, "label": "MBA junction"}
+  },
+  "edges": [
+    {"from": "j_gate",    "to": "j_main",    "stairs": false, "covered": false, "name": "Main Road"},
+    {"from": "j_main",    "to": "j_lib",     "stairs": false, "covered": false, "name": "Main Road"},
+    {"from": "j_main",    "to": "j_ab1",     "stairs": false, "covered": true,  "name": "AB-I walkway"},
+    {"from": "j_ab1",     "to": "j_lib",     "stairs": false, "covered": false, "name": "Library path"},
+    {"from": "j_lib",     "to": "j_ab2",     "stairs": true,  "covered": false, "name": "Library steps (shortcut)"},
+    {"from": "j_lib",     "to": "j_canteen", "stairs": false, "covered": false, "name": "Canteen road"},
+    {"from": "j_canteen", "to": "j_ab2",     "stairs": false, "covered": true,  "name": "AB-II ramp"},
+    {"from": "j_canteen", "to": "j_ab3",     "stairs": false, "covered": false, "name": "Canteen–AB-III road"},
+    {"from": "j_ab2",     "to": "j_ab3",     "stairs": true,  "covered": false, "name": "AB-II back steps"},
+    {"from": "j_ab3",     "to": "j_sports",  "stairs": false, "covered": false, "name": "Sports road"},
+    {"from": "j_canteen", "to": "j_hostel",  "stairs": false, "covered": false, "name": "Hostel road"},
+    {"from": "j_ab1",     "to": "j_hostel",  "stairs": false, "covered": false, "name": "AB-I–Hostel road"},
+    {"from": "j_lib",     "to": "j_mba",     "stairs": false, "covered": false, "name": "MBA road"},
+    {"from": "j_mba",     "to": "j_ab2",     "stairs": false, "covered": false, "name": "MBA–AB-II path"}
+  ]
+}

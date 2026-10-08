@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+# Runtime data (each laptop gets its own demo DB)
+backend/assignments-api/data/*.db
+backend/assignments-api/data/*.db-journal
+# Secrets
+.env
+*.key
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Big files that don't belong in git
+*.mp4
+*.mov
+node_modules/
+
+# Team-only notes (commit plan, video script)
+_team/

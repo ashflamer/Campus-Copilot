@@ -1,0 +1,85 @@
+{
+  "_note": "Coordinates are APPROXIMATE placeholders around Ettimadai campus. Fix them with the in-app Pin Editor (press E on the map) before the demo. 'verified' = checked against official Amrita info or on the ground. Only put real facts here — the AI never invents anything outside this file.",
+  "campus": {"name": "Amrita Vishwa Vidyapeetham, Coimbatore (Ettimadai)", "center": [10.9030, 76.9005], "zoom": 17},
+  "locations": [
+    {"id": "main_gate", "name": "Main Gate", "type": "gate", "category": "security",
+     "lat": 10.8998, "lng": 76.9033, "node": "j_gate",
+     "aliases": ["gate", "entrance", "main entrance", "front gate"],
+     "inside": ["Security check-in"], "hours": "24h", "verified": false},
+
+    {"id": "main_block", "name": "Main Block", "type": "admin", "category": "admin",
+     "lat": 10.9010, "lng": 76.9024, "node": "j_main",
+     "aliases": ["main building", "admin block", "administration", "office"],
+     "inside": ["Administrative offices"], "hours": null, "verified": false},
+
+    {"id": "ab1", "name": "Academic Block I", "type": "academic", "category": "academic",
+     "lat": 10.9034, "lng": 76.9024, "node": "j_ab1",
+     "aliases": ["ab1", "ab 1", "ab-i", "ab i", "academic block 1", "academic block i", "block 1", "first block"],
+     "inside": ["Classrooms", "Labs", "Departments: verify on campus"], "hours": null, "verified": false},
+
+    {"id": "ab2", "name": "Academic Block II", "type": "academic", "category": "academic",
+     "lat": 10.9037, "lng": 76.8995, "node": "j_ab2",
+     "aliases": ["ab2", "ab 2", "ab-ii", "ab ii", "academic block 2", "academic block ii", "block 2", "ece", "eee", "food science", "food science lab"],
+     "inside": ["ECE", "EEE", "Food Science & Nutrition", "Labs", "Classrooms"], "hours": null, "verified": false},
+
+    {"id": "ab3", "name": "Academic Block III", "type": "academic", "category": "academic",
+     "lat": 10.9048, "lng": 76.8987, "node": "j_ab3",
+     "aliases": ["ab3", "ab 3", "ab-iii", "ab iii", "academic block 3", "academic block iii", "block 3", "cse", "cse block", "computer science", "school of law", "law"],
+     "inside": ["CSE", "School of Law", "Labs", "Offices"], "hours": null, "verified": false},
+
+    {"id": "central_library", "name": "Central Library", "type": "library", "category": "study",
+     "lat": 10.9023, "lng": 76.9006, "node": "j_lib",
+     "aliases": ["library", "lib", "central library", "reading room"],
+     "inside": ["Books & journals", "Reading halls", "Digital library"], "hours": null, "verified": false},
+
+    {"id": "it_canteen", "name": "IT Canteen", "type": "canteen", "category": "food",
+     "lat": 10.9042, "lng": 76.9008, "node": "j_canteen",
+     "aliases": ["it canteen", "canteen", "food", "mess"],
+     "inside": ["Meals", "Snacks", "Tea/Coffee"], "hours": "07:00-19:00", "hours_note": "officially listed hours (all 3 canteens, 7 AM–7 PM)", "verified": false},
+
+    {"id": "main_canteen", "name": "Main Canteen", "type": "canteen", "category": "food",
+     "lat": 10.9014, "lng": 76.9016, "node": "j_main",
+     "aliases": ["main canteen"],
+     "inside": ["Meals", "Snacks"], "hours": "07:00-19:00", "hours_note": "officially listed hours", "verified": false},
+
+    {"id": "mba_canteen", "name": "MBA Canteen", "type": "canteen", "category": "food",
+     "lat": 10.9013, "lng": 76.8993, "node": "j_mba",
+     "aliases": ["mba canteen", "business school canteen"],
+     "inside": ["Snacks", "Tea/Coffee"], "hours": "07:00-19:00", "hours_note": "officially listed hours", "verified": false},
+
+    {"id": "dispensary", "name": "Amrita Dispensary", "type": "medical", "category": "medical",
+     "lat": 10.9027, "lng": 76.9027, "node": "j_main",
+     "aliases": ["dispensary", "clinic", "hospital", "medical", "doctor", "health centre", "health center", "pharmacy", "first aid"],
+     "inside": ["Doctor", "Pharmacy", "Emergency care"], "hours": "24h", "hours_note": "round the clock per official infrastructure page", "verified": false},
+
+    {"id": "swimming_pool", "name": "Swimming Pool", "type": "sports", "category": "sports",
+     "lat": 10.9055, "lng": 76.8972, "node": "j_sports",
+     "aliases": ["pool", "swimming", "swimming pool"],
+     "inside": ["Swimming pool"], "hours": null, "verified": false},
+
+    {"id": "main_ground", "name": "Main Ground", "type": "sports", "category": "sports",
+     "lat": 10.9047, "lng": 76.8970, "node": "j_sports",
+     "aliases": ["ground", "playground", "main ground", "sports", "field", "cricket ground"],
+     "inside": ["Football / cricket field", "Track"], "hours": null, "verified": false},
+
+    {"id": "boys_hostel", "name": "Boys Hostel", "type": "hostel", "category": "hostel",
+     "lat": 10.9060, "lng": 76.9020, "node": "j_hostel",
+     "aliases": ["boys hostel", "hostel", "men's hostel"],
+     "inside": ["Residence"], "hours": null, "verified": false},
+
+    {"id": "girls_hostel", "name": "Girls Hostel", "type": "hostel", "category": "hostel",
+     "lat": 10.9006, "lng": 76.8985, "node": "j_mba",
+     "aliases": ["girls hostel", "ladies hostel", "women's hostel"],
+     "inside": ["Residence"], "hours": null, "verified": false},
+
+    {"id": "amenities_complex", "name": "Amenities Complex", "type": "amenities", "category": "store",
+     "lat": 10.9052, "lng": 76.9006, "node": "j_hostel",
+     "aliases": ["amenities", "amenities complex", "store", "shop", "stationery", "printing", "xerox", "photocopy", "atm"],
+     "inside": ["Store", "Stationery / Printing", "ATM (verify)"], "hours": null, "verified": false},
+
+    {"id": "security_office", "name": "Security Office", "type": "security", "category": "security",
+     "lat": 10.9003, "lng": 76.9027, "node": "j_gate",
+     "aliases": ["security", "security office", "guard", "lost and found"],
+     "inside": ["Security staff", "Lost & found"], "hours": "24h", "verified": false}
+  ]
+}
